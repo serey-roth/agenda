@@ -1,0 +1,33 @@
+:root {
+    --fc-border-color: black;
+}
+
+.fc {
+    padding: 1em;
+    position: absolute;
+    top: 0%;
+    bottom: 0%;
+    left: 0%;
+    right: 0%;
+}
+
+.fc-toolbar {
+    font-size: 12px;
+    max-width: 100%;
+    display: grid;
+    grid-template-rows: repeat(3, 1fr);
+}
+
+.fc-toolbar-chunk {
+    display: flex;
+    align-items: center;
+}
+
+@media only screen and (max-width: 900px) {
+    .fc-toolbar {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+}
+
