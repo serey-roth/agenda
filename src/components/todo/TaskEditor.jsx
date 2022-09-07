@@ -7,42 +7,44 @@ import { MdClose, MdDelete, MdError } from 'react-icons/md'
 import { HiDuplicate } from 'react-icons/hi'
 import { isBefore, isAfter } from 'date-fns'
 
-import Input from '../components/styled/Input'
-import Button from '../components/styled/Button'
-import Select from '../components/styled/Select'
-import CheckBox from '../components/styled/CheckBox'
-import Header from '../components/styled/Header'
+import Input from '../styled/Input'
+import Button from '../styled/Button'
+import Select from '../styled/Select'
+import CheckBox from '../styled/CheckBox'
+import Header from '../styled/Header'
 
 import TaskDatePicker from './TaskDatePicker'
 
 import { 
     setTaskDates,
-    taskUpdated, 
-    taskRemoved,
-    taskAdded,
-    taskProjectChanged,
-    taskCompleteStatusChanged,
-    selectAllProjectKeys,
-    selectTaskById,    
-} from './todoSlice'
-import { toggleTaskEditor } from '../redux/uiSlice'
+    selectAllProjectNames,
+    selectTaskById,
+} from '../../redux/todoSlice/todoSlice'
+import { toggleTaskEditor } from '../../redux/uiSlice'
+import {
+    deleteTask,
+    duplicateTask,
+    updateTask, 
+} from '../../redux/todoSlice/tasks'
 
 const TaskEditor = () => {
     const { taskId } = useParams();
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const projects = useSelector(selectAllProjectKeys);
+    const projects = useSelector(selectAllProjectNames);
     const task = useSelector(selectTaskById(taskId));
 
     const [editorMode, setEditorMode] = useState(false);
-    const [project, setProject] = useState(task ? task.project : '');
-    const [priority, setPriority] = useState(task ? task.priority: '');
-    const [start, setStart] = useState(task ? task.start : '');
-    const [end, setEnd] = useState(task ? (task.specificEndDate ? '' :
-        task.end) : '');
-    const [specificEndDate, setSpecificEndDate] = useState(task ?
-        task.specificEndDate : '');
+    const [values, setValues] = useState({
+        project: task ? task.project : '',
+        priority: task ? task.priority : '',
+        start: task ? task.start : '',
+        end: task ? (task.specificEndDate ? '' :
+        task.end) : '',
+        specificEndDate: task ?
+        task.specificEndDate : ''
+    });
 
     const handleToggleEditorMode = () => {
         setEditorMode(prevState => !prevState)
@@ -50,65 +52,96 @@ const TaskEditor = () => {
 
     const handleSpecificEndDateChange = (date) => {
         if (date) {
-            let newTask = setTaskDates(task, date);
-            dispatch(taskUpdated(newTask));
+            let updatedTask = setTaskDates(task, date);
+            dispatch(updateTask({
+                id: task._id, 
+                updatedTask
+            }));
         } else {
-            dispatch(taskUpdated({...task, end: null,
-                specificEndDate: null}));
-            setEnd('');
+            dispatch(updateTask({
+                id: task._id,
+                updatedTask: {
+                    ...task, 
+                    end: null,
+                    specificEndDate: null,
+                }
+            }));
+            setValues(prevState => ({...prevState, end: ''}));
         }
-        setSpecificEndDate(date);
+        setValues(prevState => ({...prevState, specificEndDate: date}));
     }
 
     const handleProjectChange = (e) => {
-        setProject(e.target.value);
-        dispatch(taskProjectChanged({...task, 
-            newProject: e.target.value}));
+        dispatch(updateTask({
+            id: task._id,
+            updatedTask: {
+                ...task, 
+                project: e.target.value
+            }
+        }));
+        setValues(prevState => ({...prevState, project: e.target.value}));
     }
 
     const handlePriorityChange = (e) => {
-        setPriority(e.target.value);
-        dispatch(taskUpdated({...task, 
-            priority: e.target.value}));
+        dispatch(updateTask({
+            id: task._id,
+            updatedTask: {
+                ...task, 
+                priority: e.target.value
+            }
+        }));
+        setValues(prevState => ({...prevState, priority: e.target.value}));
     }
 
     const handleStartDateChange = (e) => {
-        if (end === '' || 
-        isBefore(new Date(e.target.value), new Date(end))) {
-            dispatch(taskUpdated({...task, 
-                start: e.target.value}));
+        if (values.end === '' || 
+        isBefore(new Date(e.target.value), new Date(values.end))) {
+            dispatch(updateTask({
+                id: task._id,
+                updatedTask: {
+                    ...task, 
+                    start: e.target.value
+                }
+            }));
         }
-        setStart(e.target.value);
+        setValues(prevState => ({...prevState, start: e.target.value}));
     }
 
     const handleEndDateChange = (e) => {
-        if (isAfter(new Date(e.target.value), new Date(start))) {
-            dispatch(taskUpdated({...task, 
-                end: e.target.value, 
-                allDay: false}));
+        if (isAfter(new Date(e.target.value), new Date(values.start))) {
+            dispatch(updateTask({
+                id: task._id,
+                updatedTask: {
+                    ...task, 
+                    end: e.target.value, 
+                    allDay: false
+                }
+            }));
         }
-        setEnd(e.target.value);
+        setValues(prevState => ({...prevState, end: e.target.value}));
     }
 
     const handleCompleteStatusChange = (e, isCompleted, formikHandler) => {
         formikHandler(e);
         let oldIsCompleted = isCompleted;
-        dispatch(taskCompleteStatusChanged({
-            ...task, 
-            isCompleted: !oldIsCompleted,
-            completeStatus: (oldIsCompleted ? 'to do' : 'completed'),
+        dispatch(updateTask({
+            id: task._id,
+            updatedTask: {
+                ...task, 
+                isCompleted: !oldIsCompleted,
+                completeStatus: (oldIsCompleted ? 'to do' : 'completed'),
+            }
         }))
     }
 
     const handleDelete = () => {
-        dispatch(taskRemoved(task));
+        dispatch(deleteTask(task._id));
         dispatch(toggleTaskEditor(false));
         navigate(-1, {replace: true});
     }
 
     const handleDuplicate = () => {
-        const {id, ...rest} = task;
-        dispatch(taskAdded({...rest}));
+        dispatch(duplicateTask(task._id));
     }
 
     const handleClose = () => {
@@ -119,8 +152,8 @@ const TaskEditor = () => {
     const projectsOptions = (
         <>
             {projects.map(projectKey => (
-                <option key={project}
-                value={project}>{project}</option>
+                <option key={projectKey}
+                value={projectKey}>{projectKey}</option>
             ))}
         </>
     );
@@ -134,7 +167,7 @@ const TaskEditor = () => {
         bg-ivory text-gunmetal text-[12px]'>
             <Header>
                 <h3 className='grow-[2] w-full text-md font-semibold
-                text-lg'>{project}</h3>
+                text-lg'>{values.project}</h3>
                 <span className='flex gap-1'>
                     <Button 
                     addOnClass='bg-blush text-[16px] border-0'
@@ -170,7 +203,10 @@ const TaskEditor = () => {
                 })}
                 onSubmit={(values) => {
                     setEditorMode(false);
-                    dispatch(taskUpdated({...task, ...values}));
+                    dispatch(updateTask({
+                        id: task._id,
+                        updatedTask: {...task, ...values}
+                    }));
                 }}>
                 {(formik) => (
                     <form onSubmit={formik.handleSubmit}
@@ -181,7 +217,7 @@ const TaskEditor = () => {
                         name='isCompleted' 
                         checked={formik.values.isCompleted}
                         className={`mt-1 ${editorMode ? 
-                            'cursor-not-allowed' : ''}`}
+                            'cursor-not-allowed pointer-events-none' : ''}`}
                         value={formik.values.isCompleted}
                         onChange={(e) => handleCompleteStatusChange(e, 
                             formik.values.isCompleted, formik.handleChange)} />
@@ -238,7 +274,7 @@ const TaskEditor = () => {
                     label='Project'
                     name='project'
                     id='project'
-                    value={project}
+                    value={values.project}
                     onChange={handleProjectChange}>
                         {projectsOptions}
                     </Select>
@@ -247,7 +283,7 @@ const TaskEditor = () => {
                     label='Priority'
                     name='priority'
                     id='priority'
-                    value={priority}
+                    value={values.priority}
                     onChange={handlePriorityChange}>
                         <option value='low'>Low</option>
                         <option value='med'>Medium</option>
@@ -256,17 +292,17 @@ const TaskEditor = () => {
                     </Select>
 
                     <TaskDatePicker 
-                    specificEndDate={specificEndDate}
+                    specificEndDate={values.specificEndDate}
                     onSpecificEndDate={handleSpecificEndDateChange}>
                         <Input 
                         label='Start'
                         type='datetime-local'
                         id='start'
                         name='start'
-                        value={start}
+                        value={values.start}
                         onChange={handleStartDateChange}>
-                        {end === '' || start === ''
-                        || isBefore(new Date(start), new Date(end)) ?
+                        {values.end === '' || values.start === ''
+                        || isBefore(new Date(values.start), new Date(values.end)) ?
                         null : 
                         <span className='w-full gap-1 flex items-center'>
                             <MdError />
@@ -282,12 +318,12 @@ const TaskEditor = () => {
                         type='datetime-local'
                         id='end'
                         name='end'
-                        value={specificEndDate ? '' : end}
-                        addOnClass={specificEndDate ? 
-                            'cursor-not-allowed contrast-50' : ''}
+                        value={values.specificEndDate ? '' : values.end}
+                        addOnClass={values.specificEndDate ? 
+                            'cursor-not-allowed contrast-50 pointer-events-none' : ''}
                         onChange={handleEndDateChange}>
-                        {end === '' || start === '' ||
-                        isAfter(new Date(end), new Date(start)) ?
+                        {values.end === '' || values.start === '' ||
+                        isAfter(new Date(values.end), new Date(values.start)) ?
                         null :  
                         <span className='w-full gap-1 flex items-center'>
                             <MdError />

@@ -12,7 +12,7 @@ import {
 } from 'react-icons/fi'
 import { BsChatDots } from 'react-icons/bs'
 
-import { logOut } from '../../auth/authSlice'
+import { logOut } from '../../redux/authSlice'
 import { selectSidebar } from '../../redux/uiSlice'
 
 import Element from './Element'

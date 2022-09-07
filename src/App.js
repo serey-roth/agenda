@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
 	Routes,
 	Route, 
@@ -8,21 +8,21 @@ import {
 } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { FaBars, FaUserCircle } from 'react-icons/fa'
-import { toggleSidebar, selectSidebar } from './redux/uiSlice'
-
 import './fullcalendar-vars.css'
+
+import { toggleSidebar, selectSidebar } from './redux/uiSlice'
+import { getTasks } from './redux/todoSlice/tasks'
+import { getCurrentProject } from './redux/todoSlice/projects'
 
 import Header from './components/styled/Header'
 import Sidebar from './components/sidebar/Sidebar'
-
-import LogIn from './auth/LogIn'
-import Register from './auth/Register'
-
-import CalendarView from './todo/CalendarView';
-import KanbanView from './todo/KanbanView';
-import TaskMaker from './todo/TaskMaker';
-import AddTaskButton from './todo/AddTaskButton';
-import TaskEditor from './todo/TaskEditor';
+import LogIn from './components/auth/LogIn'
+import Register from './components/auth/Register'
+import CalendarView from './components/todo/CalendarView';
+import KanbanView from './components/todo/KanbanView';
+import TaskMaker from './components/todo/TaskMaker';
+import AddTaskButton from './components/todo/AddTaskButton';
+import TaskEditor from './components/todo/TaskEditor';
 
 const Home = () => {
 	const sidebar = useSelector(selectSidebar);
@@ -90,7 +90,13 @@ const Tasks = () => {
 
 const Projects = () => {
 	const {title} = useParams();
-	
+
+	const dispatch = useDispatch();
+
+	useEffect(() => {
+		dispatch(getCurrentProject(title));
+	});
+
 	return (
 		<div className='flex flex-1 flex-col bg-ivory relative'>
 
@@ -108,6 +114,12 @@ const Projects = () => {
 
 function App() {
 	const user = useSelector(state => state.auth.user);
+
+	const dispatch = useDispatch();
+
+	useEffect(() => {
+		dispatch(getTasks());
+	}, [dispatch])
 
     return (
 		<div className='flex flex-col items-center justify-center

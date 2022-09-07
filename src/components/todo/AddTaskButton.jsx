@@ -5,7 +5,7 @@ import {
     selectTaskMaker, 
     selectTaskEditor,
     toggleTaskMaker,
-} from '../redux/uiSlice'
+} from '../../redux/uiSlice'
 
 const AddTaskButton = () => {
     const dispatch = useDispatch();

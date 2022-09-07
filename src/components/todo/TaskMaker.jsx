@@ -5,29 +5,28 @@ import { MdClose } from 'react-icons/md'
 import { useDispatch, useSelector } from 'react-redux'
 import { format, isBefore, isAfter } from 'date-fns'
 
-import Input from '../components/styled/Input'
-import Select from '../components/styled/Select'
-import Button from '../components/styled/Button'
+import Input from '../styled/Input'
+import Select from '../styled/Select'
+import Button from '../styled/Button'
 
 import TaskDatePicker from './TaskDatePicker'
 import { 
-    taskAdded, 
-    projectAdded,
-    selectAllProjectKeys, 
+    selectAllProjectNames, 
     setTaskDates 
-} from './todoSlice'
+} from '../../redux/todoSlice/todoSlice'
+import { createTask } from '../../redux/todoSlice/tasks'
 import { 
     toggleTaskMaker, 
     selectTaskMaker, 
     dateSelectTaskMaker, 
-} from '../redux/uiSlice'
+} from '../../redux/uiSlice'
 
 const TaskMaker = ({selectedProject}) => {
     const dispatch = useDispatch();
 
     const taskmaker = useSelector(selectTaskMaker);
 
-    const projects = useSelector(selectAllProjectKeys);
+    const projects = useSelector(selectAllProjectNames);
 
     const [specificEndDate, setSpecificEndDate] = useState(null);
 
@@ -58,10 +57,7 @@ const TaskMaker = ({selectedProject}) => {
 
     const onFormSubmit = (values) => {
         let newValues = setTaskDates(values, specificEndDate);
-        if (!projects.includes(values.project)) {
-            dispatch(projectAdded(values.project));
-        }
-        dispatch(taskAdded(newValues));
+        dispatch(createTask(newValues));
         if (taskmaker.selectedDate) {
             dispatch(dateSelectTaskMaker(null));
         }

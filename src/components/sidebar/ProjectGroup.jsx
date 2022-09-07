@@ -9,8 +9,8 @@ import {
 
 import Element from "./Element"
 import StyledNavLink from './StyledNavLink'
-import AddProject from '../../todo/AddProject'
-import { selectAllProjectKeys } from '../../todo/todoSlice'
+import AddProject from '../todo/AddProject'
+import { selectAllProjectNames } from '../../redux/todoSlice/todoSlice'
 
 const ProjectGroup = (props) => {
     const {
@@ -21,7 +21,7 @@ const ProjectGroup = (props) => {
         ...rest
     } = props;
 
-    const projects = useSelector(selectAllProjectKeys);
+    const projects = useSelector(selectAllProjectNames);
 
     const [collapse, setCollapse] = useState(true);
 

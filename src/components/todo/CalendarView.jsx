@@ -9,14 +9,17 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 
-import { taskUpdated, selectAllTasks } from './todoSlice';
+import { 
+    selectAllTasks
+} from '../../redux/todoSlice/todoSlice';
 import { 
     toggleTaskEditor, 
     selectTaskEditor, 
     selectTaskMaker,
     toggleTaskMaker,
     dateSelectTaskMaker
-} from '../redux/uiSlice'
+} from '../../redux/uiSlice'
+import { updateTask } from '../../redux/todoSlice/tasks';
 
 const CalendarView = () => {
     const location = useLocation();
@@ -28,7 +31,7 @@ const CalendarView = () => {
     const taskmaker = useSelector(selectTaskMaker);
 
     const events = tasks.map(task => ({
-        id: task.id,
+        id: task._id,
         title: task.title,
         start: task.start,
         end: task.end,
@@ -37,12 +40,13 @@ const CalendarView = () => {
 
     const handleEventMove = (info) => {
         const payload = {
-            id: info.event.id,
             title: info.event.title,
-            start: format(new Date(info.event.start), "yyyy-MM-dd'T'hh:mm"),
-            end: format(new Date(info.event.end), "yyyy-MM-dd'T'hh:mm")
+            start: format(new Date(info.event.start), 
+            "yyyy-MM-dd'T'hh:mm"),
+            end: format(new Date(info.event.end), 
+            "yyyy-MM-dd'T'hh:mm")
         }
-        dispatch(taskUpdated(payload));
+        dispatch(updateTask({id: info.event.id, updatedTask: payload}));
     }
 
     const handleEventClick = (info) => {

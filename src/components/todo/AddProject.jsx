@@ -3,13 +3,16 @@ import { Formik } from 'formik'
 import * as Yup from 'yup'
 import { useDispatch, useSelector } from 'react-redux'
 
-import Input from '../components/styled/Input'
-import Button from '../components/styled/Button'
+import Input from '../styled/Input'
+import Button from '../styled/Button'
 
-import { projectAdded, selectAllProjectKeys } from './todoSlice'
+import { 
+    projectAdded, 
+    selectAllProjectNames 
+} from '../../redux/todoSlice/todoSlice'
 
 const AddProject = ({ visible, onToggle }) => {
-    const projects = useSelector(selectAllProjectKeys);
+    const projects = useSelector(selectAllProjectNames);
 
     const dispatch = useDispatch();
 

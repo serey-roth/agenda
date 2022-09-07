@@ -4,16 +4,21 @@ import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux';
 import { 
 	selectAllTasks,
-	selectProjectByKey, 
-	projectUpdated, 
-	taskUpdated
-} from './todoSlice'
+	selectCurrentProject,
+	updateCurrentProject
+} from '../../redux/todoSlice/todoSlice'
 import { format } from 'date-fns'
-import { selectTaskEditor, selectTaskMaker, toggleTaskEditor } from '../redux/uiSlice';
+import { 
+	selectTaskEditor, 
+	selectTaskMaker, 
+	toggleTaskEditor 
+} from '../../redux/uiSlice';
+import { updateTask } from '../../redux/todoSlice/tasks';
 
-const onDragEnd = (result, tasks, title, columns, dispatch) => {
+const onDragEnd = (result, tasks, columns, dispatch) => {
 	if (!result.destination) return;
 	const {source, destination} = result;
+	const task = tasks.find(task => task._id === result.draggableId);
 	if (source.droppableId !== destination.droppableId) {
 		const sourceCol = columns[source.droppableId];
 		const destCol = columns[destination.droppableId];
@@ -21,17 +26,14 @@ const onDragEnd = (result, tasks, title, columns, dispatch) => {
 		const destItems = [...destCol.items]
 		const [removed] = sourceItems.splice(source.index, 1);
 		destItems.splice(destination.index, 0, removed);
-		dispatch(projectUpdated({
-			title, 
-			items: {
-				[source.droppableId]: {
+		dispatch(updateCurrentProject({
+			[source.droppableId]: {
 				...sourceCol,
 				items: sourceItems,
-				},
-				[destination.droppableId]: {
-					...destCol,
-					items: destItems,
-				}
+			},
+			[destination.droppableId]: {
+				...destCol,
+				items: destItems,
 			}
 		}))
 	} else {
@@ -39,25 +41,28 @@ const onDragEnd = (result, tasks, title, columns, dispatch) => {
 		const items = [...col.items];
 		const [removed] = items.splice(source.index, 1);
 		items.splice(destination.index, 0, removed);
-		dispatch(projectUpdated({
-			title, 
-			items: {
-				[source.droppableId]: {
+		dispatch(updateCurrentProject({
+			[source.droppableId]: {
 				...col,
 				items: items,
-				},
-			}
+			},
 		}))
 	}
-	const task = tasks.find(task => task.id === result.draggableId);
-	const completeStatus = columns[destination.droppableId].title.toLowerCase();
+	const completeStatus = columns[destination.droppableId].title;
 	let isCompleted = task.isCompleted;
 	if (completeStatus === 'completed') {
 		isCompleted = true;
 	} else if (completeStatus === 'to do') {
 		isCompleted = false;
 	}
-	dispatch(taskUpdated({...task, completeStatus, isCompleted}));
+	dispatch(updateTask({
+		id: task._id, 
+		updatedTask: {
+			...task, 
+			completeStatus, 
+			isCompleted
+		}
+	}));
 }
 
 const DraggableItem = ({id, index, children}) => {
@@ -106,14 +111,15 @@ const Column = ({title, id, children}) => {
 	)
 }
 
-const KanbanView  = ({title}) => {
-	const navigate = useNavigate();
-    const dispatch = useDispatch();
+const KanbanView  = () => {
+	const dispatch = useDispatch();
+	const navigate = useNavigate()
 	const tasks = useSelector(selectAllTasks);
-	const columns = useSelector(selectProjectByKey(title));
-
+	const project = useSelector(selectCurrentProject);
 	const taskmaker = useSelector(selectTaskMaker);
 	const taskeditor = useSelector(selectTaskEditor);
+	const {name, ...rest} = project;
+	const columns = {...rest};
 
     return (
         <div className={`flex-1 flex flex-col gap-2 items-center 
@@ -123,16 +129,16 @@ const KanbanView  = ({title}) => {
             <DragDropContext 
 			onDragEnd={taskmaker.visible || taskeditor ? null :
 			result => 
-			onDragEnd(result, tasks, title, columns, dispatch)}>
-			<h1 className='text-xl font-bold italic '>{title}</h1>
+			onDragEnd(result, tasks, columns, dispatch)}>
+			<h1 className='text-xl font-bold italic '>{name}</h1>
 			<div className='flex-1 w-full md:flex-row
 			flex flex-col gap-2'>
 			{Object.entries(columns).map(([columnId, column]) => 
 				<Column id={columnId} title={column.title} key={columnId}>
 					{column.items.map((item, index) =>
 						<DraggableItem 
-						key={item.id}
-						id={item.id}
+						key={item._id}
+						id={item._id}
 						index={index}>
 							{<span className='flex flex-col'>
 								<p>{item.title}</p>
@@ -141,7 +147,7 @@ const KanbanView  = ({title}) => {
 								<p className='self-end
 								italic text-md cursor-pointer'
 								onClick={() => {
-									navigate(`/projects/${title}/task/${item.id}`);
+									navigate(`/projects/${name}/task/${item._id}`);
 									dispatch(toggleTaskEditor(true));
 								}}>
 								See more</p>

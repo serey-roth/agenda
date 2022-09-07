@@ -5,11 +5,11 @@ import { FaGoogle } from 'react-icons/fa';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 
-import Input from '../components/styled/Input';
-import Button from '../components/styled/Button';
-import CheckBox from '../components/styled/CheckBox';
+import Input from '../styled/Input';
+import Button from '../styled/Button';
+import CheckBox from '../styled/CheckBox';
 
-import { signUp, googleSignIn, setUserName } from './authSlice'
+import { signUp, googleSignIn, setUserName } from '../../redux/authSlice'
 
 const Register = () => {
 	const dispatch = useDispatch();
