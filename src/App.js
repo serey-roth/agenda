@@ -7,17 +7,18 @@ import {
 	useParams,
 } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import { FaBars, FaUserCircle } from 'react-icons/fa'
+import { FaBars } from 'react-icons/fa'
+import decode from 'jwt-decode'
 import './fullcalendar-vars.css'
 
 import { toggleSidebar, selectSidebar } from './redux/uiSlice'
 import { getTasks } from './redux/todoSlice/tasks'
-import { getCurrentProject } from './redux/todoSlice/projects'
+import { getCurrentProject, getProjectNames } from './redux/todoSlice/projects'
+import { authPersisted, logOut } from './redux/authSlice'
 
 import Header from './components/styled/Header'
 import Sidebar from './components/sidebar/Sidebar'
-import LogIn from './components/auth/LogIn'
-import Register from './components/auth/Register'
+import Auth from './components/auth/Auth'
 import CalendarView from './components/todo/CalendarView';
 import KanbanView from './components/todo/KanbanView';
 import TaskMaker from './components/todo/TaskMaker';
@@ -25,8 +26,20 @@ import AddTaskButton from './components/todo/AddTaskButton';
 import TaskEditor from './components/todo/TaskEditor';
 
 const Home = () => {
+	const user = useSelector(state => state.auth.user);
 	const sidebar = useSelector(selectSidebar);
-	const dispatch = useDispatch();
+	const dispatch = useDispatch();	
+
+	useEffect(() => {
+        const token = user?.token;
+        if (token) {
+            const decodedToken = decode(token);
+            if (decodedToken.exp * 1000 < new Date().getTime) {
+                dispatch(logOut());
+            }
+        }
+    })
+
     return (
         <div className='w-full flex flex-col h-screen'>
             <Header>
@@ -35,13 +48,11 @@ const Home = () => {
 						<button onClick={() => 
 							dispatch(toggleSidebar(!sidebar))}>
 						<FaBars /></button>
-						<h1>to do list</h1>
+						<h1>agenda</h1>
 					</span>
-					<span className='flex gap-1 justify-self-end items-center'>
-						<p>Hello, user!</p>
-						<button>
-							<FaUserCircle />
-						</button>
+					<span className='flex gap-1 
+					justify-self-end items-center capitalize'>
+						<p>Hello, {user ? user.result?.name : 'user'}!</p>
 					</span>
 				</span>
 			</Header>
@@ -54,7 +65,8 @@ const Home = () => {
     )
 }
 
-const ProtectedRoute = ({user, redirectPath, children}) => {
+const ProtectedRoute = ({redirectPath, children}) => {
+	const user = useSelector(state => state.auth.user);
 	if (user) {
 		return <>{children}</>;
 	} else {
@@ -64,9 +76,10 @@ const ProtectedRoute = ({user, redirectPath, children}) => {
 
 const AuthLayOut = () => {
 	return (
-		<div className='w-screen h-screen sm:w-[500px]
-		sm:h-[500px] bg-ivory text-gunmetal
-		flex justify-center items-center 
+		<div className='w-screen h-screen 
+		sm:w-[500px] flex flex-col
+		sm:h-[550px] bg-ivory text-gunmetal
+		justify-center items-center sm:rounded-md
 		drop-shadow-md shadow-slate-200'>
 			<Outlet />
 		</div>
@@ -74,6 +87,12 @@ const AuthLayOut = () => {
 }
 
 const Tasks = () => {	
+	const dispatch = useDispatch();
+
+	useEffect(() => {
+		dispatch(getTasks());
+	})
+
 	return (
 		<div className='flex flex-1 flex-col bg-ivory relative'>
 
@@ -113,12 +132,15 @@ const Projects = () => {
 }
 
 function App() {
-	const user = useSelector(state => state.auth.user);
-
 	const dispatch = useDispatch();
 
 	useEffect(() => {
-		dispatch(getTasks());
+		const user = localStorage.getItem('currentUser');
+		dispatch(authPersisted(user ? JSON.parse(user) : null));
+	}, [dispatch])
+
+	useEffect(() => {
+		dispatch(getProjectNames());
 	}, [dispatch])
 
     return (
@@ -127,7 +149,6 @@ function App() {
 			<Routes>
 				<Route exact path='/' element={
 					<ProtectedRoute
-					user={user}
 					redirectPath={'/auth'}>
 						<Home />
 					</ProtectedRoute>
@@ -146,9 +167,8 @@ function App() {
 						</Route>
 					</Route>
 				</Route>
-				<Route path='/auth' element={<AuthLayOut />}>
-					<Route index element={<LogIn />} />
-					<Route path='signup' element={<Register />} />
+				<Route element={<AuthLayOut />}>
+					<Route path='/auth' element={<Auth />} />
 				</Route>
 			</Routes>
 		</div>

@@ -1,8 +1,9 @@
 import React from 'react'
 
-const CheckBox = ({children, ...props}) => {
+const CheckBox = ({children, addOnClass, ...props}) => {
     return (
-        <span className='px-1 flex gap-1'>
+        <span className={`px-1 flex gap-1 
+        ${addOnClass ? addOnClass : ''}`}>
 			<input type='checkbox' {...props} />
             {children}
 		</span>

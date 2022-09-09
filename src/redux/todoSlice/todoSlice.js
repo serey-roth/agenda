@@ -13,6 +13,7 @@ import {
 } from './tasks'
 import {
     getCurrentProject,
+    getProjectNames
 } from './projects'
 
 const initialState = {
@@ -83,30 +84,10 @@ const todoSlice = createSlice({
                     state.currentProject.name = project.name;
                 }
             }
-        })/* 
-        .addCase(updateTaskStatusInProject.fulfilled, (state, action) => {
-            state.tasks = state.tasks.map(task => 
-            task._id === action.payload._id ? 
-            action.payload : task);
         })
-        .addCase(createTaskInProject.fulfilled, (state, action) => {
-            state.tasks.push(action.payload);
-            if (!state.projectNames.includes(action.payload.project)) {
-                state.projectNames.push(action.payload.project)
-            }
+        .addCase(getProjectNames.fulfilled, (state, action) => {
+            state.projectNames = ['Inbox', ...action.payload];
         })
-        .addCase(deleteTaskInProject.fulfilled, (state, action) => {
-            state.tasks = state.tasks.filter(task => 
-                task._id !== action.payload);
-        })
-        .addCase(updateTaskInProject.fulfilled, (state, action) => {
-            state.tasks = state.tasks.map(task => 
-            task._id === action.payload._id ? 
-            action.payload : task);
-        })
-        .addCase(duplicateTaskInProject.fulfilled, (state, action) => {
-            state.tasks.push(action.payload);
-        }) */
     }
 })
 

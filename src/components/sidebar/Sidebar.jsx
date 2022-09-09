@@ -70,7 +70,7 @@ const LogIn = () => (
 
 const Sidebar = () => {
     const sidebar = useSelector(selectSidebar);
-    const { user, loggedIn } = useSelector(state => state.auth);
+    const { user } = useSelector(state => state.auth);
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
@@ -106,7 +106,7 @@ const Sidebar = () => {
 
             <Settings />
 
-            {!loggedIn ? <LogIn /> : <LogOut />}
+            {!user ? <LogIn /> : <LogOut />}
         </div>
     )
 }
