@@ -2,6 +2,7 @@ import React from 'react'
 import { DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux';
+
 import { 
 	selectAllTasks,
 	selectCurrentProject,
@@ -9,13 +10,12 @@ import {
 } from '../../redux/todoSlice/todoSlice'
 import { format } from 'date-fns'
 import { 
-	selectTaskEditor, 
-	selectTaskMaker, 
-	toggleTaskEditor 
+	toggleTaskEditor,
+	getPriorityColor
 } from '../../redux/uiSlice';
 import { updateTask } from '../../redux/todoSlice/tasks';
 
-const onDragEnd = (result, tasks, columns, dispatch) => {
+const onDragEnd = (result, tasks, columns, dispatch, sortBy) => {
 	if (!result.destination) return;
 	const {source, destination} = result;
 	const task = tasks.find(task => task._id === result.draggableId);
@@ -65,16 +65,16 @@ const onDragEnd = (result, tasks, columns, dispatch) => {
 	}));
 }
 
-const DraggableItem = ({id, index, children}) => {
+const DraggableItem = ({id, priority, index, children}) => {
 	return (
 		<Draggable index={index} draggableId={id}>
 			{(provided, snapshot) => 
 				<div
 				className={`select-none font-semibold
+				${getPriorityColor(priority)}
 				${snapshot.isDragging ?
-					'bg-ivory text-gunmetal' : 
-					'bg-blush text-ivory'} 
-				rounded-lg p-2`}
+					'bg-ivory' : ''} 
+				rounded-lg p-2 text-black`}
 				ref={provided.innerRef}
 				{...provided.draggableProps}
 				{...provided.dragHandleProps}
@@ -90,7 +90,7 @@ const Column = ({title, id, children}) => {
 	return (
 		<div className='flex-1 flex flex-col gap-1 items-center'>
 			<h2 className='font-bold border-2 border-slate-200 rounded-lg 
-			w-full p-2 bg-blush text-ivory'>{title}</h2>
+			w-full p-2 bg-slate-500 capitalize text-ivory'>{title}</h2>
 			<div className='flex-1 w-full rounded-lg relative'>
 				<Droppable droppableId={id}>
 				{(provided, snapshot) => 
@@ -116,21 +116,19 @@ const KanbanView  = () => {
 	const navigate = useNavigate()
 	const tasks = useSelector(selectAllTasks);
 	const project = useSelector(selectCurrentProject);
-	const taskmaker = useSelector(selectTaskMaker);
-	const taskeditor = useSelector(selectTaskEditor);
+	const ui = useSelector(state => state.ui);
 	const {name, ...rest} = project;
 	const columns = {...rest};
 
     return (
-        <div className={`flex-1 flex flex-col gap-2 items-center 
-		bg-ivory text-gunmental p-2 
-		${taskmaker.visible || taskeditor ? `cursor-not-allowed
+		<div className={`flex-1 flex flex-col gap-2 items-center 
+		bg-ivory dark:bg-timberwolf text-gunmental p-2 
+		${ui.taskmaker.visible || ui.taskeditor ? `cursor-not-allowed
 		pointer-events-none contrast-50` : ''}`}>
             <DragDropContext 
-			onDragEnd={taskmaker.visible || taskeditor ? null :
+			onDragEnd={ui.taskmaker.visible || ui.taskeditor ? null :
 			result => 
 			onDragEnd(result, tasks, columns, dispatch)}>
-			<h1 className='text-xl font-bold italic '>{name}</h1>
 			<div className='flex-1 w-full md:flex-row
 			flex flex-col gap-2'>
 			{Object.entries(columns).map(([columnId, column]) => 
@@ -139,18 +137,24 @@ const KanbanView  = () => {
 						<DraggableItem 
 						key={item._id}
 						id={item._id}
+						priority={item.priority}
 						index={index}>
 							{<span className='flex flex-col'>
-								<p>{item.title}</p>
-								<p>Due: {format(new Date(item.end),
-									 "yyyy-MM-dd 'at' HH:mm aa")}</p>
-								<p className='self-end
-								italic text-md cursor-pointer'
-								onClick={() => {
-									navigate(`/projects/${name}/task/${item._id}`);
-									dispatch(toggleTaskEditor(true));
-								}}>
-								See more</p>
+								<p className='italic text-md font-semibold capitalize'>
+								{item.title}
+								</p>
+								<span className='flex justify-between items-center'>
+									<p>Due: {format(new Date(item.end),
+										"yyyy-MM-dd 'at' hh:mm aa")}</p>
+									<p className='
+									italic text-sm cursor-pointer hover:-translate-x-1
+									transtion duration-300 ease-in-out'
+									onClick={() => {
+										navigate(`/projects/${name}/task/${item._id}`);
+										dispatch(toggleTaskEditor(true));
+									}}>
+									See more</p>
+								</span>
 							</span>}
 						</DraggableItem>
 					)}

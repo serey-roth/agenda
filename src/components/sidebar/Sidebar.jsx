@@ -1,21 +1,16 @@
-import React, { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useDispatch, useSelector } from 'react-redux'
+import React from 'react'
+import { useSelector } from 'react-redux'
 import { MdTaskAlt } from 'react-icons/md'
 import { 
     FiInbox, 
     FiSettings, 
     FiFolder, 
-    FiLogIn,
-    FiLogOut,
     FiArchive
 } from 'react-icons/fi'
 import { BsChatDots } from 'react-icons/bs'
 
-import { logOut } from '../../redux/authSlice'
 import { selectSidebar } from '../../redux/uiSlice'
 
-import Element from './Element'
 import StyledNavLink from './StyledNavLink'
 import ProjectGroup from './ProjectGroup';
 
@@ -60,53 +55,30 @@ const Settings = () => (
     />
 )
 
-const LogIn = () => (
-    <StyledNavLink 
-        icon={<FiLogIn />}
-        to='/auth' 
-        name='Log In' 
-    />
-)
 
 const Sidebar = () => {
     const sidebar = useSelector(selectSidebar);
-    const { user } = useSelector(state => state.auth);
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
-
-    useEffect(() => {
-		if (!user) {
-			navigate('/auth');
-		} 
-	}, [user, navigate]); 
-
-    const LogOut = () => (
-        <Element icon={<FiLogOut />} 
-        onClick={() => {
-            dispatch(logOut());
-        }}>
-            <p>Log Out</p>
-        </Element>
-    )
-
+    
     return (
         <div className={`w-1/2 sm:w-[250px] px-2 py-2
-        flex flex-col gap-1 bg-gunmetal text-ivory 
-        text-[14px] font-semibold absolute top-0 bottom-0
+        flex flex-col bg-timberwolf text-gunmetal
+        dark:bg-gunmetal dark:text-ivory
+        font-semibold absolute top-0 bottom-0
         z-10 sm:relative ${sidebar ? '' : 'hidden'}`} >
-            <Inbox />
+            <div className='flex flex-col gap-2 flex-1'>
+                <Inbox />
 
-            <Tasks />
+                <Tasks />
 
-            <ProjectGroup name='Projects' icon={<FiFolder />} />
-            
-            <Archive />
+                <ProjectGroup name='Projects' icon={<FiFolder />} />
+                
+                <Archive />
 
-            <Messenger />
+                <Messenger />
 
-            <Settings />
-
-            {!user ? <LogIn /> : <LogOut />}
+                <Settings />
+            </div>
+            <p>&copy; 2022 Serey Roth</p>
         </div>
     )
 }

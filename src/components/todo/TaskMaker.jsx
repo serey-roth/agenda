@@ -113,10 +113,11 @@ const TaskMaker = ({selectedProject}) => {
         >
         {(formik) => (
             <form onSubmit={formik.handleSubmit}
-            className={`flex flex-col bg-ivory text-gunmetal
-            gap-1 px-4 py-2 text-[0.7em] w-screen sm:w-[300px]
-            absolute top-0 bottom-0 right-0 z-10 mix-blend-luminosity 
-            backdrop-blur-sm ${taskmaker.visible ? '' : ' hidden'}`}>
+            className={`flex flex-col bg-timberwolf text-gunmetal
+            dark:bg-gunmetal dark:text-ivory backdrop-blur-sm 
+            gap-1 px-4 py-3 text-[0.7em] w-screen sm:w-[350px] 
+            overflow-auto absolute top-0 bottom-0 right-0 z-10 
+            ${taskmaker.visible ? '' : ' hidden'}`}>
                 <span className='flex w-full items-center px-1'>
                     <h1 className='text-[1.3em] grow font-semibold'>
                         What's on your mind today?
@@ -139,13 +140,13 @@ const TaskMaker = ({selectedProject}) => {
                 placeholder='e.g. Call Amanda'
                 {...formik.getFieldProps('title')}/>
 
-                <textarea className={`rounded-lg
-                px-3 py-1 h-[50px] resize-none`}
+                <textarea className={`rounded-lg text-gunmetal
+                px-3 py-1 flex-1 min-h-[100px] resize-none`}
                 placeholder="e.g. It's her birthay next week!"
                 {...formik.getFieldProps('description')}>
                 </textarea>
 
-                <span className='flex gap-1 w-full'>
+                <span className='flex my-1 gap-1 w-full'>
                     <Select 
                     label='Project'
                     name='project'
@@ -158,10 +159,10 @@ const TaskMaker = ({selectedProject}) => {
                     name='priority'
                     id='priority'
                     {...formik.getFieldProps('priority')}>
-                        <option value='low'>Low</option>
-                        <option value='med'>Medium</option>
-                        <option value='high'>High</option>
-                        <option value='urg'>Urgent</option>
+                        <option value='1'>Low</option>
+                        <option value='2'>Medium</option>
+                        <option value='3'>High</option>
+                        <option value='4'>Urgent</option>
                     </Select>
                 </span>
 
@@ -173,8 +174,9 @@ const TaskMaker = ({selectedProject}) => {
                     type='datetime-local'
                     id='start'
                     name='start'
-                    addOnClass={specificEndDate ? 
-                        'cursor-not-allowed contrast-50' : ''}
+                    addOnClass={`text-[12px]
+                    ${specificEndDate ? 
+                    'cursor-not-allowed contrast-50' : ''}`}
                     touched={formik.touched.start}
                     error={formik.errors.start}
                     {...formik.getFieldProps('start')}/>
@@ -184,14 +186,15 @@ const TaskMaker = ({selectedProject}) => {
                     type='datetime-local'
                     id='end'
                     name='end'
-                    addOnClass={specificEndDate ? 
-                        'cursor-not-allowed contrast-50' : ''}
+                    addOnClass={`text-[12px]
+                    ${specificEndDate ? 
+                    'cursor-not-allowed contrast-50' : ''}`}
                     touched={formik.touched.end}
                     error={formik.errors.end}
                     {...formik.getFieldProps('end')}/>
                 </TaskDatePicker>
 
-                <span className='flex w-full mt-1 gap-1'>
+                <span className='flex w-full gap-2'>
                     <Button addOnClass='grow' type='button'
                     onClick={() => onCancel(formik.resetForm, 
                         formik.setTouched,

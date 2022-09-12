@@ -6,7 +6,9 @@ const initial = {
     taskmaker: {
         visible: false, 
         selectedDate: null,
-    }
+    },
+    darkMode: false,
+    projectSort: 'none'
 }
 
 const uiSlice = createSlice({
@@ -25,6 +27,17 @@ const uiSlice = createSlice({
         dateSelectTaskMaker(state, action) {
             state.taskmaker.selectedDate = action.payload;
         },
+        toggleDarkMode(state, action) {
+            state.darkMode = !state.darkMode;
+            if (state.darkMode) {
+                document.body.classList.add('dark');
+            } else {
+                document.body.classList.remove('dark');
+            }
+        },
+        setProjectSortSelection(state, action) {
+            state.projectSort = action.payload;
+        }
     }
 })
 
@@ -33,6 +46,8 @@ export const {
     toggleTaskEditor,
     toggleTaskMaker,
     dateSelectTaskMaker,
+    toggleDarkMode,
+    setProjectSortSelection
 } = uiSlice.actions;
 
 export const selectTaskMaker = state => state.ui.taskmaker;
@@ -40,5 +55,14 @@ export const selectTaskMaker = state => state.ui.taskmaker;
 export const selectTaskEditor = state => state.ui.taskeditor;
 
 export const selectSidebar = state => state.ui.sidebar;
+
+export const getPriorityColor = (priority) => {
+    switch(priority) {
+        case '2': return 'bg-yellow-300';
+        case '3': return 'bg-pink-400';
+        case '4': return 'bg-red-500';
+        default: return 'bg-green-300';
+    }
+}
 
 export default uiSlice.reducer

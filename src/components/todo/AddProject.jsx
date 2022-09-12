@@ -6,10 +6,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import Input from '../styled/Input'
 import Button from '../styled/Button'
 
-import { 
-    projectAdded, 
-    selectAllProjectNames 
-} from '../../redux/todoSlice/todoSlice'
+import { selectAllProjectNames } from '../../redux/todoSlice/todoSlice'
+import { addProject } from '../../redux/todoSlice/projects'
 
 const AddProject = ({ visible, onToggle }) => {
     const projects = useSelector(selectAllProjectNames);
@@ -35,13 +33,13 @@ const AddProject = ({ visible, onToggle }) => {
                 })
             })}
             onSubmit={(values, { resetForm }) => {
-                dispatch(projectAdded(values.title));    
+                dispatch(addProject({project: values.title}));    
                 resetForm({title: ''});          
             }}>
             {(formik) => (
                 <form onSubmit={formik.handleSubmit}
-                className={'w-full flex flex-col gap-1' +
-                (visible ? '' : ' hidden')}>
+                className={`w-full flex flex-col gap-1
+                ${visible ? '' : ' hidden'}`}>
                     <Input
                     label='Project Name'
                     type='text'

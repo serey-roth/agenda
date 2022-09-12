@@ -9,12 +9,7 @@ const authSlice = createSlice({
         error: null,
     },
     reducers: {
-        googleAuth(state, action) {
-            state.user = action.payload;
-            localStorage.setItem('currentUser', JSON.stringify(action.payload));
-        },
         logOut(state, action) {
-            state.user = null;
             localStorage.removeItem('currentUser');
         },
         authPersisted(state, action) {
@@ -24,28 +19,33 @@ const authSlice = createSlice({
     extraReducers: builder => {
         builder
         .addCase(signIn.pending, (state, action) => {
-            state.status = 'sign in pending';
+            state.status = 'pending';
         })
         .addCase(signIn.fulfilled, (state, action) => {
             state.user = action.payload;
-            state.status = 'sign in success';
+            state.status = 'idle';
             localStorage.setItem('currentUser', JSON.stringify(action.payload));
         })
         .addCase(signIn.rejected, (state, action) => {
             state.error = action.payload;
-            state.status = 'sign in rejected';
+            state.status = 'rejected';
         })
         .addCase(signUp.pending, (state, action) => {
-            state.status = 'sign up pending';
+            state.status = 'pending';
         })
         .addCase(signUp.fulfilled, (state, action) => {
             state.user = action.payload;
-            state.status = 'sign up success';
+            state.status = 'idle';
             localStorage.setItem('currentUser', JSON.stringify(action.payload));
         })
         .addCase(signUp.rejected, (state, action) => {
             state.error = action.payload;
-            state.status = 'sign up rejected';
+            state.status = 'rejected';
+        })
+        .addCase(googleSignIn.fulfilled, (state, action) => {
+            state.user = action.payload;
+            state.status = 'idle';
+            localStorage.setItem('currentUser', JSON.stringify(action.payload));
         })
     }
 })
@@ -70,6 +70,19 @@ async (user, {rejectWithValue}) => {
     }
 })
 
-export const { googleAuth, logOut, authPersisted } = authSlice.actions;
+export const googleSignIn = createAsyncThunk('auth/googleSignIn', 
+async (data) => {
+    const { email, name } = data.result;
+    const { userId } = data;
+    const { result, token } = data;
+    try {
+        await api.googleSignIn({email, name, userId});
+        return {result, token};
+    } catch(error) {
+        console.log(error.message);
+    }
+});
+
+export const { logOut, authPersisted } = authSlice.actions;
 
 export default authSlice.reducer

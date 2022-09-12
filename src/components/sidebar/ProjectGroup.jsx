@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useSelector } from "react-redux"
 import { FiSquare } from 'react-icons/fi'
 import {
@@ -23,7 +23,13 @@ const ProjectGroup = (props) => {
 
     const projects = useSelector(selectAllProjectNames);
 
-    const [collapse, setCollapse] = useState(true);
+    const [collapse, setCollapse] = useState(projects?.length === 1);
+
+    useEffect(() => {
+        if (projects?.length > 1) {
+            setCollapse(prevState => !prevState);
+        }
+    }, [projects]);
 
     const [
         addProjectVisible, 
@@ -55,9 +61,10 @@ const ProjectGroup = (props) => {
         />
     )
 
-    const groupClass = `flex flex-col gap-1 
+    const groupClass = `flex flex-col gap-1
     ${addOnClass ? addOnClass : ''} ${!collapse ? 
-    ' bg-timberwolf text-gunmetal rounded-lg p-1' : ''}`
+    `bg-slate-400 text-gunmetal text-md
+    rounded-lg py-2` : ''}`
 
     return (
         <div className={groupClass}>
@@ -68,8 +75,7 @@ const ProjectGroup = (props) => {
                 
                 <button className={`hover:ring rounded-full 
                 p-1 transition duration-400
-                delay-75 ease-in` + 
-                (!collapse ? ' text-gunmetal' : ' text-ivory')}
+                delay-75 ease-in`}
                 onClick={handleToggleAddProject}>
                     <FiFolderPlus />
                 </button>

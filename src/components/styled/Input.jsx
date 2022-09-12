@@ -12,7 +12,7 @@ const Input = (props) => {
     } = props;
 
     const labelClass = 'px-1 ' + (touched && error ? 'text-red-500' : '');
-    const inputClass = `px-3 py-2 rounded-full focus:ring
+    const inputClass = `px-3 py-2 rounded-full focus:ring text-gunmetal
     transition duration-300 ease-in-out shadow-sm shadow-slate-200 
     ${addOnClass ? addOnClass : ''}`;
 

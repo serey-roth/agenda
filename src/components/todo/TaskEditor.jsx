@@ -159,30 +159,30 @@ const TaskEditor = () => {
     );
 
     return (
-        <div className='w-screen sm:w-[80%] h-full
-        md:h-[500px] absolute z-20 sm:top-1/2 sm:left-1/2 
-        sm:-translate-x-1/2 sm:-translate-y-1/2
+        <div className='scale-100 sm:scale-[80%]
+        absolute top-0 bottom-0 left-0 right-0
         flex flex-col items-stretch border-2 
-        border-slate-300 drop-shadow-xl
-        bg-ivory text-gunmetal text-[12px]'>
+        border-slate-300 drop-shadow-xl overflow-auto
+        bg-timberwolf text-gunmetal text-sm
+        dark:bg-gunmetal dark:text-ivory'>
             <Header>
                 <h3 className='grow-[2] w-full text-md font-semibold
                 text-lg'>{values.project}</h3>
-                <span className='flex gap-1'>
+                <span className='flex gap-2'>
                     <Button 
-                    addOnClass='bg-blush text-[16px] border-0'
+                    addOnClass='text-[18px] hover:scale-110'
                     onClick={handleDuplicate}>
                         <HiDuplicate />
                     </Button>
 
                     <Button 
-                    addOnClass='bg-blush text-[14px] border-0'
+                    addOnClass='text-[18px] hover:scale-110'
                     onClick={handleDelete}>
                         <MdDelete />
                     </Button>
 
                     <Button 
-                    addOnClass='bg-blush text-[14px] border-0'
+                    addOnClass='text-[18px] hover:scale-110'
                     onClick={handleClose}>
                         <MdClose />
                     </Button>
@@ -210,8 +210,7 @@ const TaskEditor = () => {
                 }}>
                 {(formik) => (
                     <form onSubmit={formik.handleSubmit}
-                    className='flex grow gap-1 md:w-[80%] w-[96%]
-                    items-start'>
+                    className='flex flex-1 gap-1 items-start'>
                         <CheckBox 
                         id='isCompleted'
                         name='isCompleted' 
@@ -241,7 +240,7 @@ const TaskEditor = () => {
                             {...formik.getFieldProps('title')}/>
 
                             <textarea className='rounded-lg
-                            px-3 py-2 h-[100px] resize-none'
+                            px-3 py-2 h-[100px] resize-none text-gunmetal'
                             placeholder="e.g. It's her birthay next week!"
                             onClick={() => {
                                 if (!editorMode) {
@@ -251,7 +250,7 @@ const TaskEditor = () => {
                             {...formik.getFieldProps('description')}>
                             </textarea>
 
-                            <span className={`grid grid-cols-2 mt-2 
+                            <span className={`grid grid-cols-2 gap-2 mt-2 
                              ${editorMode ? '' : ' hidden'}`}
                             >
                                 <Button type='button'
@@ -284,11 +283,12 @@ const TaskEditor = () => {
                     name='priority'
                     id='priority'
                     value={values.priority}
+                    addOnClass='mb-2'
                     onChange={handlePriorityChange}>
-                        <option value='low'>Low</option>
-                        <option value='med'>Medium</option>
-                        <option value='high'>High</option>
-                        <option value='urg'>Urgent</option>
+                        <option value='1'>Low</option>
+                        <option value='2'>Medium</option>
+                        <option value='3'>High</option>
+                        <option value='4'>Urgent</option>
                     </Select>
 
                     <TaskDatePicker 

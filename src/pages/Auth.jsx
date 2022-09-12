@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { FaGoogle } from 'react-icons/fa';
 import { MdError } from 'react-icons/md'
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { GoogleLogin } from 'react-google-login' 
 import { gapi } from 'gapi-script'
+import decode from 'jwt-decode'
 
-import Input from '../styled/Input';
-import Button from '../styled/Button';
-import CheckBox from '../styled/CheckBox';
+import Input from '../components/styled/Input';
+import Button from '../components/styled/Button';
+import CheckBox from '../components/styled/CheckBox';
+import DarkModeToggler from '../components/styled/DarkModeToggler';
 
-import { googleAuth, signIn, signUp } from '../../redux/authSlice';
+import { googleSignIn, signIn, signUp } from '../redux/authSlice';
 
 const logIn = {
 	initialValues: {
@@ -57,10 +59,9 @@ const register = {
 	})
 }
 
-const clientId = '811768979377-ct1mdt71e65kauaj7a2pd3vb4d6g1c75.apps.googleusercontent.com'
+const clientId = process.env.REACT_APP_CLIENT_ID;
 
 const Auth = () => {
-	const user = useSelector(state => state.auth.user);
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const [isSignedIn, setIsSignedIn] = useState(true);
@@ -75,16 +76,15 @@ const Auth = () => {
 		gapi.load('client:auth2', start);
 	}, [])
 
-	useEffect(() => {
-		if (user) {
-			navigate('/tasks');
-		}
-	}, [dispatch, navigate, user])
-
 	const googleSuccess = (res) => {
 		const { profileObj, tokenId } = res;
-		dispatch(googleAuth({result: profileObj, token: tokenId}));
-		navigate('/tasks');
+        const decodedToken = decode(tokenId);
+		dispatch(googleSignIn({
+			result: profileObj, 
+			token: tokenId, 
+			userId: decodedToken.sub
+		}));
+		navigate('/tasks', {replace: true});
 	}
 
 	const googleFailure = (error) => {
@@ -98,11 +98,12 @@ const Auth = () => {
 		} else {
 			dispatch(signUp({ ...rest }));
 		}
-		navigate('/tasks');
+		navigate('/tasks', {replace: true});
 	}
 
 	return (
 		<>
+			<DarkModeToggler addOnClass='self-end absolute top-3 right-3'/>
 			<Formik
 			initialValues={isSignedIn ? 
 				logIn.initialValues : 
@@ -114,8 +115,9 @@ const Auth = () => {
 			>
 			{(formik) => (
 				<form onSubmit={formik.handleSubmit}
-				className='flex flex-col 
-				bg-ivory text-gunmetal w-full
+				className='flex flex-col w-full
+				bg-ivory text-gunmetal
+				dark:bg-gunmetal dark:text-ivory
 				gap-2 px-8 py-3 text-[0.75em]'>
 
 					<h1 className='font-semibold text-center text-[1.5em]
@@ -140,7 +142,7 @@ const Auth = () => {
 						<hr className='border-slate-400'></hr>
 						<p className='absolute top-1/2 left-1/2
 						-translate-x-1/2 -translate-y-1/2 z-10
-						px-2 bg-ivory text-[10px]'>
+						px-2 bg-ivory dark:bg-gunmetal text-[10px]'>
 							Or {isSignedIn ? 'Sign In' : 'Sign Up'} With Email
 						</p>
 					</span>
