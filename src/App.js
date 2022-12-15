@@ -28,8 +28,10 @@ function App() {
 
 	useLayoutEffect(() => {
 		const user = localStorage.getItem('currentUser')
-		if (user) {
-			dispatch(authPersisted(user ? JSON.parse(user) : null));
+		if (user && JSON.parse(user)) {
+			dispatch(authPersisted(JSON.parse(user)));
+		} else {
+			dispatch(authPersisted(null));
 		}
 	}, [dispatch])
 
