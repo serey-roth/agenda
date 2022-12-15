@@ -1,6 +1,15 @@
 import axios from 'axios'
 
-const API = axios.create({ baseURL: 'http://localhost:5000' });
+const configOptions = {
+    baseURL: 'https://agenda-2xsm.onrender.com',
+    headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods':'GET,PUT,POST,DELETE,PATCH,OPTIONS',
+    }
+}
+
+const API = axios.create(configOptions);
 
 API.interceptors.request.use((req) => {
     const user = localStorage.getItem('currentUser')
